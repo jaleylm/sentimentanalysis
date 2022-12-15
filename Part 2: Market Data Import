@@ -1,0 +1,25 @@
+#in the second step we need to make sure, our program can access our API and make news-requests, therefore we import the following:
+
+#Importing the modules newsapi to import real data from websites, and datetime to calculate the time in a practical way
+from newsapi import NewsApiClient
+from datetime import date, timedelta
+
+#Asking the user the company for which he wants to do the analysis
+a= input("Choose a Stock for which you would like to perform the analysis: ")
+#Input in the variable "phrase", the name of the stock chosen + adding the word stock to get every finance-related article 
+phrase = str(a) + " stock"
+
+#Adding my unique APIKey found by creating an account in the API 'newsapi-python"
+newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
+my_date = date.today() - timedelta(days = 7)
+
+#Restricting the list to 10 articles to be more visible
+articles = newsapi.get_everything(q=phrase,
+                                  from_param = my_date.isoformat(),
+                                  language="en",
+                                  sort_by="relevancy",
+                                  page_size = 10)
+
+#Printing all article summaries thanks to this loop, with their title + their publishing time + their ULR
+for article in articles['articles']:
+  print(article['title']+ ' | ' + article['publishedAt'] + ' | ' + article['url'])
