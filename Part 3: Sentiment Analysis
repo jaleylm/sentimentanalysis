@@ -1,0 +1,82 @@
+#similarily, we also have to import needed analytical kits first and will then do the calculation of the sentiment
+
+#Importing ntlk module, and we need to download vader_lexicon to make sure the library works well in th english language
+import nltk
+nltk.download('vader_lexicon')
+
+#Importing each modules we need to create the chart and to calculate the sentiment analysis
+import sys
+import nltk
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from newsapi import NewsApiClient
+from datetime import date, timedelta, datetime
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import yfinance as yf
+
+sia = SentimentIntensityAnalyzer()
+
+#Setting the display size
+pd.set_option('display.max_colwidth',1000)
+
+#Define a variable "get_sources", by linking my APIKey in order to connect the program to this API
+def get_sources(category = None):
+  newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
+  sources = newsapi.get_sources()
+
+  #Explaining that if there is no particular category for the sources, ...
+  #... it will look for every possible articles in english, otherwise it will only focus on a sector defined like "business" for our case
+  if category is not None:
+    rez = [source['id'] for source in sources['sources'] if source['category'] == category and source['language'] == 'en']
+  else:
+    rez = [source['id'] for source in sources['sources'] if source['language'] == 'en']
+  
+  return rez
+  
+  #Not relevant for the program, but it shows the number of category we can choose to focus on
+len(get_sources())
+
+#Showing us the newspapers in which our program will look into
+get_sources('business')
+
+#Creating the variable below, acting according to : the name of the stock + the source category + telling it not to print every articles
+def get_articles_sentiments(keywrd, startd, sources_list = None, show_all_articles = False):
+
+  newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
+  #Indicating the date is  this day thanks to the module datetime
+  if type(startd)== str :
+    my_date = datetime.strptime(startd,'%d-%b-%Y')
+  else:
+    my_date = startd
+  #If the sources list is provided we have to use it, 
+  if sources_list:
+    articles = newsapi.get_everything(q = keywrd, from_param = my_date.isoformat(), to = (my_date + timedelta(days = 1)).isoformat(), language="en", sources = ",".join(sources_list), sort_by="relevancy", page_size = 100)
+  else:
+    articles = newsapi.get_everything(q = keywrd, from_param = my_date.isoformat(),to = (my_date + timedelta(days = 1)).isoformat(), language="en", sort_by="relevancy", page_size = 100)
+  
+  article_content = ''
+
+  date_sentiments = {}
+  date_sentiments_list = []
+  seen = set()
+  
+  for article in articles['articles']:
+    if str(article['title']) in seen:
+      continue
+    else:
+      seen.add(str(article['title']))
+      article_content = str(article['title']) + '. ' + str(article['description'])
+      #Calculating the sentiment score by compounding the scores
+      sentiment = sia.polarity_scores(article_content)['compound']
+  
+      date_sentiments.setdefault(my_date, []).append(sentiment)
+      date_sentiments_list.append((sentiment, article['url'], article['title'],article['description']))
+      
+  date_sentiments_l = sorted(date_sentiments_list, key = lambda tup: tup[0],reverse = True)
+  sent_list = list(date_sentiments.values())[0]
+
+      #Return a dataframe with all sentiment scores and articles  
+  return pd.DataFrame(date_sentiments_list, columns=['Sentiment','URL','Title','Description'])
+  
+  #with these codes the sentiment analysis is set und should be working
