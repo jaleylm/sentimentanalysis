@@ -13,3 +13,8 @@ print(return_articles.Sentiment.count())
 
 print(return_articles.Description)
 
+#we now organize and portray the calculated sentiments/ Printing Sentiment Analysis by order
+
+return_articles.sort_values(by='Sentiment', ascending=True)[['Sentiment','URL', 'Description','Title']].head(3)
+
+return_articles.sort_values(by='Sentiment', ascending=False)[['Sentiment','URL', 'Description','Title']].head(3)
