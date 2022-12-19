@@ -79,15 +79,4 @@ def get_articles_sentiments(keywrd, startd, sources_list = None, show_all_articl
       #Return a dataframe with all sentiment scores and articles  
   return pd.DataFrame(date_sentiments_list, columns=['Sentiment','URL','Title','Description'])
   
-  #with these codes the sentiment analysis is set und should be working. If we want to analyze several stocks, the program has the following code prepared
-  
-  ## Sentiment for a bunch of general stocks
-    # Indicating the variable to look only for articles in the business sector (previously defined by "sources"), since 24/11/2022.
-    return_articles = get_articles_sentiments('Apple Stock', '24-Nov-2022', sources_list=sources, show_all_articles=True)
-
-
-    # Printing the economic sentiment mean (with only 4 decimals) thanks to the "return_articles.Sentiment.mean" variable
-    print("The economic sentiment since the 1st November has a mean of : " + str(return_articles.Sentiment.mean())[:6] + " according to the articles")
-
-    # Printing with how many articles this variable has been calculated
-    print("This mean has been calculated in a bunch of " + str(return_articles.Sentiment.count()) + " aricles")
+  #with these codes the sentiment analysis is set und should be working. 
