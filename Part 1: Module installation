@@ -10,3 +10,20 @@ except ModuleNotFoundError:
 #... respectively in order to 1.Importing financial data, and 2. Present the graph and the data
 !pip install newsapi-python
 !pip install yfinance
+
+# Importing the modules newsapi to import real data from websites, and datetime to calculate the time in a practical way
+from newsapi.newsapi_client import NewsApiClient
+from datetime import date, timedelta
+
+# Importing each modules we need to create the chart and to calculate the sentiment analysis
+import sys
+import nltk
+from tkinter import *
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
+from newsapi.newsapi_client import NewsApiClient
+from datetime import date, timedelta, datetime
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import yfinance as yf
+sia = SentimentIntensityAnalyzer()
