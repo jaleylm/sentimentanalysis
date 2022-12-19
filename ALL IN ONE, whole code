@@ -1,34 +1,12 @@
-"""## **PART I - MARKET DATA**"""
-#Installing the 2 necessary module "newsapi-python" and "yfinance", ...
-#... respectively in order to 1.Importing financial data, and 2. Present the graph and the data
-!pip install newsapi-python
-!pip install yfinance
-
+#!!!!  IF YOU DONT HAVE 'vader_lexicon' insert into line 7 --> nltk.downloader.download('vader_lexicon') !!!!
 # Importing the modules newsapi to import real data from websites, and datetime to calcul the time in a practical way
 from newsapi.newsapi_client import NewsApiClient
 from datetime import date, timedelta
-
-# Adding my unique APIKey found by creating an account in the API 'newsapi-python"
-newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
-my_date = date.today() - timedelta(days=7)
-
-# Restricting the list to 10 articles to be more visible
-articles = newsapi.get_everything(q=phrase,
-                                  from_param=my_date.isoformat(),
-                                  language="en",
-                                  sort_by="relevancy",
-                                  page_size=10)
-
-
-"""## **PART II - Sentiments Analysis**"""
-
-# Importing ntlk module, and we need to download vader_lexicon to make sure the library works well in th english language
-import nltk
-nltk.download('vader_lexicon')
-
 # Importing each modules we need to create the chart and to calcul the sentiment analysis
 import sys
+
 import nltk
+from tkinter import *
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from newsapi.newsapi_client import NewsApiClient
 from datetime import date, timedelta, datetime
@@ -38,119 +16,169 @@ import pandas as pd
 import yfinance as yf
 sia = SentimentIntensityAnalyzer()
 
-# Setting the display size
-pd.set_option('display.max_colwidth', 1000)
+##  MARKET DATA
+sia = SentimentIntensityAnalyzer()
 
+#GUI
+root = Tk()
+root.geometry("1800x1800")
 
-# Define a variable "get_sources", by linking my APIKey in order to connect the program to this API
-def get_sources(category=None):
+# def funktion for "show selection"
+def var1():
+    label1 = Label(root, text=selection.get())
+    label1.grid(row=3, column=1)
+
+# def funktion for plotting the sentiment analysis in a graph
+def var2():
+    # Input in the variable "phrase", the name of the stock chosen + adding the word stock to get every finance-related article
+    phrase = str(selection) + " stock"
+
+    # Adding my unique APIKey found by creating an account in the API 'newsapi-python"
     newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
-    sources = newsapi.get_sources()
+    my_date = date.today() - timedelta(days=7)
 
-    # Explaining that if there is no particular category for the sources, ...
-    # ... it will look for every possible articles in english, otherwise it will only focus on a sector defined like "business" for our case
-    if category is not None:
-        rez = [source['id'] for source in sources['sources'] if source['category'] == category and source['language'] == 'en']
-    else:
-        rez = [source['id'] for source in sources['sources'] if source['language'] == 'en']
+    # Restricting the list to 10 articles to be more visible
+    articles = newsapi.get_everything(q=phrase,
+                                      from_param=my_date.isoformat(),
+                                      language="en",
+                                      sort_by="relevancy",
+                                      page_size=10)
 
-    return rez
-
-
-# Not relevant for the program, but it shows the number of category we can choose to focus on
-len(get_sources())
-
-# Showing us the newspapers in which our program will look into
-get_sources('business')
-
-
-# Creating the variable below, acting according to : the name of the stock + the source category + telling it not to print every articles
-def get_articles_sentiments(keywrd, startd, sources_list = None, show_all_articles = False):
-
-    newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
-    # Indicating the date is  this day thanks to the module datetime
-    if type(startd) == str:
-        my_date = datetime.strptime(startd, '%d-%b-%Y')
-    else:
-        my_date = startd
-    # If the sources list is provided we have to use it,
-    if sources_list:
-        articles = newsapi.get_everything(q=keywrd, from_param=my_date.isoformat(), to=(my_date + timedelta(days=1)).isoformat(), language="en", sources=",".join(sources_list), sort_by="relevancy", page_size=100)
-    else:
-        articles = newsapi.get_everything(q=keywrd, from_param=my_date.isoformat(),  to=(my_date + timedelta(days=1)).isoformat(), language="en", sort_by="relevancy", page_size=100)
-
-    #Setting the article_content as a string
-    article_content = ''
-
-   #Creating a list for the date sentiments
-    date_sentiments = {}
-    date_sentiments_list = []
-    seen = set()
-
-    #Creating a loop that calculate the sum of the scores found, and that puts the article descriptions/titles into variables
+    # Printing all article summaries thanks to this loop, with their title + their publishing time + their ULR
     for article in articles['articles']:
-        if str(article['title']) in seen:
-            continue
+        print(article['title'] + ' | ' + article['publishedAt'] + ' | ' + article['url'])
+
+    ## Sentiments Analysis
+    sia = SentimentIntensityAnalyzer()
+
+    # Setting the display size
+    pd.set_option('display.max_colwidth', 1000)
+
+    # Define a variable "get_sources", by linking my APIKey in order to connect the program to this API
+    def get_sources(category=None):
+        url = 'https://newsapi.org/v2/everything?'
+        newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
+        sources = newsapi.get_sources()
+
+        # Explaining that if there is no particular category for the sources, ...
+        # ... it will look for every possible articles in english, otherwise it will only focus on a sector defined like "business" for our case
+        if category is not None:
+            rez = [source['id'] for source in sources['sources'] if source['category'] == category and source['language'] == 'en']
         else:
-            seen.add(str(article['title']))
-            #Adding description of each articles found into the variable article_content
-            article_content = str(article['title']) + '. ' + str(article['description'])
-            # Calculating the sentiment score by compounding the scores
-            sentiment = sia.polarity_scores(article_content)['compound']
+            rez = [source['id'] for source in sources['sources'] if source['language'] == 'en']
+        return rez
 
-            date_sentiments.setdefault(my_date, []).append(sentiment)
-            date_sentiments_list.append((sentiment, article['url'], article['title'], article['description']))
+    # Not relevant for the program, but it shows the number of category we can choose to focus on
+    len(get_sources())
 
-    #Sorted the sentiment analysis by articles values, the more it is near from 1 the better it is
-    date_sentiments_l = sorted(date_sentiments_list, key=lambda tup: tup[0], reverse=True)
-    sent_list = list(date_sentiments.values())[0]
+    # Showing us the newspapers in which our program will look into
+    get_sources('business')
 
-    # Return a dataframe with all sentiment scores and articles
-    return pd.DataFrame(date_sentiments_list, columns=['Sentiment', 'URL', 'Title', 'Description'])
+    # Creating the variable below, acting according to : the name of the stock + the source category + telling it not to print every articles
+    def get_articles_sentiments(keywrd, startd, sources_list=None, show_all_articles=False):
+        newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
+        # Indicating the date is  this day thanks to the module datetime
+        if type(startd) == str:
+            my_date = datetime.strptime(startd, '%d-%b-%Y')
+        else:
+            my_date = startd
+        # If the sources list is provided we have to use it,
+        if sources_list:
+            articles = newsapi.get_everything(q=keywrd, from_param=my_date.isoformat(), to=(my_date + timedelta(days=1)).isoformat(), language="en", sources=",".join(sources_list), sort_by="relevancy", page_size=100)
+        else:
+            articles = newsapi.get_everything(q=keywrd, from_param=my_date.isoformat(), to=(my_date + timedelta(days=1)).isoformat(), language="en", sort_by="relevancy", page_size=100)
+
+        article_content = ''
+
+        date_sentiments = {}
+        date_sentiments_list = []
+        seen = set()
+
+        for article in articles['articles']:
+            if str(article['title']) in seen:
+                continue
+            else:
+                seen.add(str(article['title']))
+                article_content = str(article['title']) + '. ' + str(article['description'])
+                # Calculating the sentiment score by compounding the scores
+                sentiment = sia.polarity_scores(article_content)['compound']
+
+                date_sentiments.setdefault(my_date, []).append(sentiment)
+                date_sentiments_list.append((sentiment, article['url'], article['title'], article['description']))
+
+        date_sentiments_l = sorted(date_sentiments_list, key=lambda tup: tup[0], reverse=True)
+        sent_list = list(date_sentiments.values())[0]
+
+        # Return a dataframe with all sentiment scores and articles
+        return pd.DataFrame(date_sentiments_list, columns=['Sentiment', 'URL', 'Title', 'Description'])
+
+    ## Printing Analysis (Mean + Chart)
+    sources = get_sources('business')
+    return_articles = get_articles_sentiments('Apple Stock', startd= '24-Nov-2022',sources_list = sources, show_all_articles = True)
+
+    ##Plotting
+    # x axis values
+    x = [selection.get()]
+    # corresponding y axis values
+    y = [return_articles.Sentiment.mean()]
+
+    # plotting the points
+    plt.plot(x, y, color='black', linestyle='dashed', linewidth=3,
+             marker='o', markerfacecolor='black', markersize=12)
+
+    # setting x and y axis range
+    plt.ylim(-1, 1)
+    plt.xlim(0, 2)
+
+    # naming the x axis
+    plt.xlabel("stock")
+    # naming the y axis
+    plt.ylabel("sentiment")
+
+    # giving a title to my graph
+    plt.title("Sentiment Value")
+
+    # function to show the plot
+    plt.show()
+
+    ##  Printing sentiments analysis by order
+    return_articles.sort_values(by='Sentiment', ascending=True)[['Sentiment', 'URL', 'Description', 'Title']].head(3)
+    return_articles.sort_values(by='Sentiment', ascending=False)[['Sentiment', 'URL', 'Description', 'Title']].head(3)
+
+    ## Sentiment for a bunch of general stocks
+    # Indicating the variable to look only for articles in the business sector (previously defined by "sources"), since 24/11/2022.
+    return_articles = get_articles_sentiments('Apple Stock', '24-Nov-2022', sources_list=sources, show_all_articles=True)
 
 
-"""## **PART III - Printing Analysis (Mean + Chart)**"""
-#Asking the user the company for which he wants to do the analysis
-a= input("Choose a Stock for which you would like to perform the analysis: ")
+    # Printing the economic sentiment mean (with only 4 decimals) thanks to the "return_articles.Sentiment.mean" variable
+    print("The economic sentiment since the 1st November has a mean of : " + str(return_articles.Sentiment.mean())[:6] + " according to the articles")
 
-#Indicating that it needs to search only for business sources
-sources = get_sources('business')
-return_articles = get_articles_sentiments(str(a), startd='24-Nov-2022', sources_list=sources)
-
-# Printing the chart
-return_articles.Sentiment.hist(bins=40, grid=False)
-
-#Printing the counting the number of articles found about the stock
-print("We have found " + str(return_articles.Sentiment.count()) +" articles about this stock from 24/11/22")
-
-print("")
-
-#Printing the description of every articles found
-print(return_articles.Description)
+    # Printing with how many articles this variable has been calculated
+    print("This mean has been calculated in a bunch of " + str(return_articles.Sentiment.count()) + " aricles")
 
 
-"""## **Sentiment for a bunch of general stocks**"""
 
-# Indicating the variable to look only for articles in the business sector (previously defined by "sources"), since 24/11/2022.
-return_articles = get_articles_sentiments(keywrd= str(a), startd= '24-Nov-2022', sources_list=sources)
-# Indicating the columns size and deleting the rear grid
-return_articles.Sentiment.hist(bins=30, grid=False)
+# Creating the input field for the stock to choose
 
-#Adding a space line
-print("")
-# Printing the economic sentiment mean (with only 4 decimals) thanks to the "return_articles.Sentiment.mean" variable
-print("The economic sentiment of " + str(a) +" since the 24th November has a mean of : " + str(return_articles.Sentiment.mean())[:6] + " according a bunch of " + str(return_articles.Sentiment.count())+ " articles.")
-first = str(return_articles.Sentiment.mean())[:6]
+# create a Label to show text for entry
+selectionLabel = Label(root, text="Choose a Stock for which you would like to perform the analysis: ")
+selectionLabel.grid(row=0, column=0, padx=10)
 
-#Indicating the variable to look only for articles in the business sector (previously defined by "sources"), since 24/11/2022.
-return_articles = get_articles_sentiments(keywrd= 'stock', startd='24-Nov-2022',sources_list = sources, show_all_articles=True)
+# create a entry to let user choose a stock
+selection = Entry(root, width=20)
+selection.grid(row=0, column=1, pady=10)
 
-#Printing the economic sentiment mean (with only 4 decimals) thanks to the "return_articles.Sentiment.mean" variable
-print("The global economic sentiment since the 24th November has a mean of : " + str(return_articles.Sentiment.mean())[:6] + " according a bunch of " + str(return_articles.Sentiment.count())+" articles.") 
-second = str(return_articles.Sentiment.mean())[:6]
+# Creating the "show selection" button
+button1 = Button(root, text="show selection", command=var1)
+button1.grid(row=2, column=1)
 
-#Calculating the difference of economic sentiment between the stock and the global market
-difference_stock = float(first)-float(second)
-#Adding a space line
-print("")
-print("The " + str(stock) + " has a difference of " + str(difference_stock)[:6] + " compared to the global market's economic sentiment.")
+# Creating the "show selection" button
+button2: Button = Button(root, text="show selection", command=var1)
+button2.grid(row=2, column=1)
+
+# Creating the "do sentiment analysis" button inside the frame
+button3 = Button(root, text="do sentiment analysis:", command=var2)
+button3.grid(row=4, column=1)
+
+# Loops the code
+root.mainloop()
