@@ -2,7 +2,7 @@
 
 a = input("Write")
 sources = get_sources('business')
-return_articles = get_articles_sentiments(keywrd= str(a), startd= '10-Nov-2022',sources_list = sources, show_all_articles = True)
+return_articles = get_articles_sentiments(selection.get(), startd= '10-Nov-2022',sources_list = sources, show_all_articles = True)
 
 #Printing the chart
 return_articles.Sentiment.hist(bins = 40, grid = False)
