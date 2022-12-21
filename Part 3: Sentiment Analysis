@@ -22,6 +22,7 @@ pd.set_option('display.max_colwidth',1000)
 
 #Define a variable "get_sources", by linking my APIKey in order to connect the program to this API
 def get_sources(category = None):
+  url = 'https://newsapi.org/v2/everything?'
   newsapi = NewsApiClient(api_key='f704389a97e24101834d34232a5da98d')
   sources = newsapi.get_sources()
 
