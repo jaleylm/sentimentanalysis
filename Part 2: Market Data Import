@@ -11,6 +11,10 @@ root.geometry("1800x1800")
 def var1():
     label1 = Label(root, text=selection.get())
     label1.grid(row=3, column=1)
+    
+def var3(): #same for "show second selection"
+    label1 = Label(root, text=selection2.get())
+    label1.grid(row=3, column=3)
 
 # def function for plotting the sentiment analysis in a graph
 def var2():
