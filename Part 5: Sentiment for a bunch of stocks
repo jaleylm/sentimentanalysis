@@ -1,7 +1,7 @@
 #to make comparisons between different stocks, we enable the user to get the sentiment for a bunch of stocks within this part
 
 #Indicating the variable to look only for articles in the business sector (previously defined by "sources"), since 01/11/2022.
-return_articles = get_articles_sentiments('stock','10-Nov-2022',sources_list = sources, show_all_articles=True)
+return_articles = get_articles_sentiments(selection.get(),'10-Nov-2022',sources_list = sources, show_all_articles=True)
 #Indicating the columns size and deleting the rear grid
 return_articles.Sentiment.hist(bins = 30, grid = False)
 
