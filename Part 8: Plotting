@@ -1,0 +1,24 @@
+ ##Plotting
+    # x axis values
+    x = [selection.get(),selection2.get()]
+    # corresponding y axis values
+    y = [return_articles1.Sentiment.mean(),return_articles2.Sentiment.mean()]
+
+    # plotting the points
+    plt.plot(x, y, color='black', linestyle='dashed', linewidth=3,
+             marker='o', markerfacecolor='black', markersize=8)
+
+    # setting x and y axis range
+    plt.ylim(-1, 1)
+    plt.xlim(0, 2)
+
+    # naming the x axis
+    plt.xlabel("stock")
+    # naming the y axis
+    plt.ylabel("sentiment")
+
+    # giving a title to my graph
+    plt.title("Sentiment Value")
+
+    # function to show the plot
+    plt.show()
