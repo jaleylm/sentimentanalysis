@@ -1,0 +1,35 @@
+###to make our user ask for input, the program will do the following:
+
+# Creating the input field for the stock to choose
+
+# create a Label to show text for entry
+selectionLabel = Label(root, text="Choose a Stock for which you would like to perform the analysis: ")
+selectionLabel.grid(row=0, column=0, padx=10)
+
+# create a entry to let user choose a stock
+selection = Entry(root, width=20)
+selection.grid(row=0, column=1, pady=10)
+
+
+# create a Label to show text for entry
+selectionLabel2 = Label(root, text="Choose another Stock to compare: ")
+selectionLabel2.grid(row=0, column=2, padx=10)
+
+# create a second entry to let user choose a stock
+selection2 = Entry(root, width=20)
+selection2.grid(row=0, column=3, pady=10)
+
+# Creating the second "show selection" button
+button = Button(root, text="show selection", command=var1)
+button.grid(row=2, column=1)
+
+# Creating the second "show selection" button
+button2: Button = Button(root, text="show second selection", command=var3)
+button2.grid(row=2, column=3)
+
+# Creating the "do sentiment analysis" button inside the frame
+button3 = Button(root, text="do sentiment analysis ", command=var2,pady=9 )
+button3.grid(row=4, column=1, columnspan=2, pady=50)
+
+# Loops the code
+root.mainloop()
